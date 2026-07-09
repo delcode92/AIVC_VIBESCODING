@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Mahasiswa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Form Data Mahasiswa</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Form -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Input Mahasiswa</h2>
+                <form id="formMahasiswa" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">NIM</label>
+                        <input type="text" id="nim" required
+                            class="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Nama</label>
+                        <input type="text" id="nama" required
+                            class="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Jurusan</label>
+                        <input type="text" id="jurusan" required
+                            class="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Angkatan</label>
+                        <input type="number" id="angkatan" required
+                            class="mt-1 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium">
+                        Simpan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Daftar Mahasiswa</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead>
+                            <tr class="bg-gray-200 text-gray-600 uppercase text-xs">
+                                <th class="px-4 py-3">NIM</th>
+                                <th class="px-4 py-3">Nama</th>
+                                <th class="px-4 py-3">Jurusan</th>
+                                <th class="px-4 py-3">Angkatan</th>
+                                <th class="px-4 py-3">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableMahasiswa"></tbody>
+                    </table>
+                    <p id="emptyMsg" class="text-gray-400 text-center py-6">Belum ada data mahasiswa.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = (() => {
+            const host = window.location.hostname;
+            if (host === "localhost" || host === "127.0.0.1") return "http://localhost:8000";
+            const m = host.match(/^(.+)-(\d+)\.(.+)$/);
+            if (m) return `${window.location.protocol}//${m[1]}-8000.${m[3]}`;
+            return "http://localhost:8000";
+        })();
+
+        async function loadData() {
+            const res = await fetch(`${API}/mahasiswa`);
+            const data = await res.json();
+            const tbody = document.getElementById("tableMahasiswa");
+            const empty = document.getElementById("emptyMsg");
+            tbody.innerHTML = "";
+            if (data.length === 0) {
+                empty.style.display = "block";
+                return;
+            }
+            empty.style.display = "none";
+            data.forEach(m => {
+                const tr = document.createElement("tr");
+                tr.className = "border-b hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-mono">${m.nim}</td>
+                    <td class="px-4 py-3">${m.nama}</td>
+                    <td class="px-4 py-3">${m.jurusan}</td>
+                    <td class="px-4 py-3">${m.angkatan}</td>
+                    <td class="px-4 py-3">
+                        <button onclick="hapus('${m.nim}')"
+                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs">
+                            Hapus
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function hapus(nim) {
+            await fetch(`${API}/mahasiswa/${nim}`, { method: "DELETE" });
+            loadData();
+        }
+
+        document.getElementById("formMahasiswa").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const payload = {
+                nim: document.getElementById("nim").value,
+                nama: document.getElementById("nama").value,
+                jurusan: document.getElementById("jurusan").value,
+                angkatan: parseInt(document.getElementById("angkatan").value),
+            };
+            await fetch(`${API}/mahasiswa`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            document.getElementById("formMahasiswa").reset();
+            loadData();
+        });
+
+        loadData();
+    </script>
+</body>
+</html>

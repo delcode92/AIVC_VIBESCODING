@@ -1,0 +1,13 @@
+Buat form simple untuk input data mahasiswa, tampilkan hasil input datanya berupa tabel disamping form tersebut
+
+Untuk frontend gunakan html , js, dan tailwind, untuk nama file html berikan nama file mahasiswa.html
+Untuk penampung data sebagai simulasi databse gunakan JSON
+Untuk backend gunakan python fast api
+
+Untuk menjalankan frontend gunakan perintah `npx run mahasiswa`
+Pastikan endpoint python fastapi bisa terhubung  dengan frontend
+
+untuk FE gunakan port 3001
+untuk BE gunakan port 8000
+
+pastikan data bisa realtime muncul  pada FE tabel saat user menambah data mahasiswa

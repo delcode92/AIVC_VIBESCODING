@@ -1,0 +1,2 @@
+buat api simple pakai python fast api, untuk katalog barang yg bisa return json 
+untuk katalog brg tersebut

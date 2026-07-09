@@ -1,0 +1,14 @@
+{
+  "name": "calc",
+  "version": "1.0.0",
+  "description": "Simple calculator app",
+  "bin": {
+    "calc": "calc.js"
+  },
+  "scripts": {
+    "start": "npx serve katalog",
+    "start:calc": "node calc.js",
+    "mahasiswa": "npx serve . -l 3001"
+  },
+  "license": "MIT"
+}

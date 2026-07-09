@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; font-family: system-ui, sans-serif;
+      background: #1a1a2e;
+    }
+    .calc {
+      background: #16213e; border-radius: 16px; padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); width: 320px;
+    }
+    .display {
+      background: #0f3460; border-radius: 12px; padding: 20px;
+      margin-bottom: 16px; text-align: right; min-height: 80px;
+    }
+    .display .expr { color: #a8b2d1; font-size: 14px; min-height: 20px; word-break: break-all; }
+    .display .result { color: #fff; font-size: 32px; font-weight: 700; }
+    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button {
+      padding: 16px; font-size: 18px; border: none; border-radius: 10px;
+      cursor: pointer; background: #1a1a40; color: #fff; transition: 0.15s;
+    }
+    button:hover { background: #2a2a5a; }
+    button:active { transform: scale(0.95); }
+    button.span2 { grid-column: span 2; }
+    .op { color: #64ffda; }
+    .eq { background: #e94560; color: #fff; }
+    .eq:hover { background: #ff6b81; }
+    .clear { color: #e94560; }
+  </style>
+</head>
+<body>
+  <div class="calc">
+    <div class="display">
+      <div class="expr" id="expr"></div>
+      <div class="result" id="result">0</div>
+    </div>
+    <div class="buttons">
+      <button class="clear" onclick="clearAll()">AC</button>
+      <button class="op" onclick="input('±')">±</button>
+      <button class="op" onclick="input('%')">%</button>
+      <button class="op" onclick="input('÷')">÷</button>
+      <button onclick="input('7')">7</button>
+      <button onclick="input('8')">8</button>
+      <button onclick="input('9')">9</button>
+      <button class="op" onclick="input('×')">×</button>
+      <button onclick="input('4')">4</button>
+      <button onclick="input('5')">5</button>
+      <button onclick="input('6')">6</button>
+      <button class="op" onclick="input('−')">−</button>
+      <button onclick="input('1')">1</button>
+      <button onclick="input('2')">2</button>
+      <button onclick="input('3')">3</button>
+      <button class="op" onclick="input('+')">+</button>
+      <button class="span2" onclick="input('0')">0</button>
+      <button onclick="input('.')">.</button>
+      <button class="eq" onclick="calculate()">=</button>
+    </div>
+  </div>
+  <script>
+    const exprEl = document.getElementById('expr');
+    const resultEl = document.getElementById('result');
+    let expression = '';
+    let current = '0';
+    let resetNext = false;
+
+    const OPS = { '+': '+', '−': '-', '×': '*', '÷': '/' };
+
+    function updateDisplay() {
+      exprEl.textContent = expression || '\u00A0';
+      resultEl.textContent = current;
+    }
+
+    function input(val) {
+      if (val === 'AC') { clearAll(); return; }
+
+      if (val === '±') {
+        if (current === '0') return;
+        current = String(-parseFloat(current));
+        updateDisplay();
+        return;
+      }
+
+      if (val === '%') {
+        current = String(parseFloat(current) / 100);
+        updateDisplay();
+        return;
+      }
+
+      const isOp = val in OPS;
+
+      if (isOp) {
+        if (expression && !resetNext) {
+          expression += ' ' + current + ' ' + val;
+        } else if (expression && resetNext) {
+          expression = expression.replace(/[+\-−×÷]\s*$/, '') + ' ' + val;
+        } else {
+          expression = current + ' ' + val;
+        }
+        resetNext = true;
+        updateDisplay();
+        return;
+      }
+
+      if (val === '.' && current.includes('.')) return;
+
+      if (resetNext) {
+        current = val === '.' ? '0.' : val;
+        resetNext = false;
+      } else {
+        if (current === '0' && val !== '.') current = val;
+        else current += val;
+      }
+      updateDisplay();
+    }
+
+    function calculate() {
+      if (!expression) return;
+      const fullExpr = expression + ' ' + current;
+      const expr = fullExpr.replace(/[−×÷]/g, m => OPS[m]);
+      try {
+        const calcResult = Function('"use strict"; return (' + expr + ')')();
+        exprEl.textContent = fullExpr + ' =';
+        current = String(parseFloat(calcResult.toFixed(10)));
+        expression = '';
+        resetNext = true;
+        resultEl.textContent = current;
+      } catch {
+        current = 'Error';
+        expression = '';
+        resetNext = true;
+        updateDisplay();
+      }
+    }
+
+    function clearAll() {
+      expression = '';
+      current = '0';
+      resetNext = false;
+      updateDisplay();
+    }
+  </script>
+</body>
+</html>
